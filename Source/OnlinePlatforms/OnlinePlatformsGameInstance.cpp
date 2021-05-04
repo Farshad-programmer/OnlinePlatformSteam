@@ -8,6 +8,7 @@
 #include "PlatformTrigger.h"
 #include "Blueprint/UserWidget.h"
 #include "MenuSystem/MainMenu.h"
+#include "OnlineSubsystem.h"
 
 UOnlinePlatformsGameInstance::UOnlinePlatformsGameInstance(const FObjectInitializer& ObjectIn)
 {
@@ -21,7 +22,17 @@ UOnlinePlatformsGameInstance::UOnlinePlatformsGameInstance(const FObjectInitiali
 
 void UOnlinePlatformsGameInstance::Init()
 {
-	UE_LOG(LogTemp,Warning,TEXT("Found Class %s"),*MenuClass->GetName());
+	// UE_LOG(LogTemp,Warning,TEXT("Found Class %s"),*MenuClass->GetName());
+	IOnlineSubsystem* SubSystem = IOnlineSubsystem::Get();
+	if (SubSystem)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("Found SubSystem: %s"),*SubSystem->GetSubsystemName().ToString());
+		IOnlineSessionPtr SessionInterface = SubSystem->GetSessionInterface();
+		if (SessionInterface)
+		{
+			UE_LOG(LogTemp,Warning,TEXT("Found Session Interface"));
+		}
+	}
 }
 
 void UOnlinePlatformsGameInstance::LoadMenu()
