@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "OnlineSubsystem.h"
 #include "MenuSystem/MenuInterface.h"
 #include "OnlinePlatformsGameInstance.generated.h"
 
@@ -29,9 +30,13 @@ public:
 	UFUNCTION(Exec)
 	void Join(const FString& Address);
 
+
 private:
 	TSubclassOf<class UUserWidget>MenuClass;
 
 	class UMainMenu* Menu;
-	
+
+	IOnlineSessionPtr SessionInterface;
+	void OnCreateSessionComplete(FName SessionName, bool Success);
+
 };
