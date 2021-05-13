@@ -13,7 +13,7 @@
 #include "MenuSystem/MainMenu.h"
 
 
-
+const static FName SESSION_NAME = TEXT("My Session game");
 
 UOnlinePlatformsGameInstance::UOnlinePlatformsGameInstance(const FObjectInitializer& ObjectIn)
 {
@@ -36,6 +36,7 @@ void UOnlinePlatformsGameInstance::Init()
 		if (SessionInterface.IsValid())
 		{
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UOnlinePlatformsGameInstance::OnCreateSessionComplete);
+			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UOnlinePlatformsGameInstance::OnDestroySessionComplete);
 		}
 	}
 }
@@ -58,8 +59,15 @@ void UOnlinePlatformsGameInstance::Host()
 {
 	if (SessionInterface.IsValid())
 	{
-		FOnlineSessionSettings SessionSetting;
-		SessionInterface->CreateSession(0, TEXT("My Session game"), SessionSetting);
+		auto ExisitingSession = SessionInterface->GetNamedSession(SESSION_NAME);
+		if (ExisitingSession != nullptr)
+		{
+			SessionInterface->DestroySession(SESSION_NAME);
+		} 
+		else
+		{
+			CreateSesion();
+		}
 	}
 }
 
@@ -84,6 +92,24 @@ void UOnlinePlatformsGameInstance::OnCreateSessionComplete(FName SessionName, bo
 	}
 }
 
+
+void UOnlinePlatformsGameInstance::OnDestroySessionComplete(FName SessionName, bool Success)
+{
+	if (Success)
+	{
+		CreateSesion();
+	}
+}
+
+
+void UOnlinePlatformsGameInstance::CreateSesion()
+{
+	if (SessionInterface.IsValid())
+	{
+		FOnlineSessionSettings SessionSetting;
+		SessionInterface->CreateSession(0, SESSION_NAME, SessionSetting);
+	}
+}
 
 // Create Join part to game , so other players can join to host 
 void UOnlinePlatformsGameInstance::Join(const FString& Address)
