@@ -37,6 +37,16 @@ void UOnlinePlatformsGameInstance::Init()
 		{
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UOnlinePlatformsGameInstance::OnCreateSessionComplete);
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UOnlinePlatformsGameInstance::OnDestroySessionComplete);
+			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UOnlinePlatformsGameInstance::OnFindSessionsComplete);
+
+			SessionSearch = MakeShareable(new FOnlineSessionSearch());
+			if (SessionSearch.IsValid())
+			{
+				SessionSearch->bIsLanQuery = true;
+				UE_LOG(LogTemp, Warning, TEXT("Starting to Find Session!!"));
+				SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+			}
+			
 		}
 	}
 }
@@ -102,11 +112,28 @@ void UOnlinePlatformsGameInstance::OnDestroySessionComplete(FName SessionName, b
 }
 
 
+void UOnlinePlatformsGameInstance::OnFindSessionsComplete(bool Success)
+{
+	if (Success && SessionSearch.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Finishing Find Session!!"));
+
+		for (const FOnlineSessionSearchResult& SearchResult : SessionSearch->SearchResults)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Found Session name:%s"),*SearchResult.GetSessionIdStr());
+		}
+	}
+	
+}
+
 void UOnlinePlatformsGameInstance::CreateSesion()
 {
 	if (SessionInterface.IsValid())
 	{
 		FOnlineSessionSettings SessionSetting;
+		SessionSetting.bIsLANMatch = true;
+		SessionSetting.NumPublicConnections = 2;
+		SessionSetting.bShouldAdvertise = true;
 		SessionInterface->CreateSession(0, SESSION_NAME, SessionSetting);
 	}
 }
