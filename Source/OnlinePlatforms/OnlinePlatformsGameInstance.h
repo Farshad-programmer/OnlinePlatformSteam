@@ -30,6 +30,7 @@ public:
 	UFUNCTION(Exec)
 	void Join(const FString& Address);
 
+	void RefreshServerList()override;
 
 private:
 	TSubclassOf<class UUserWidget>MenuClass;

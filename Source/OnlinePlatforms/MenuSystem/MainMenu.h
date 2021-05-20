@@ -15,6 +15,11 @@ class ONLINEPLATFORMS_API UMainMenu : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+
+	UMainMenu(const FObjectInitializer& ObjectIn);
+
+	void SetServerList(TArray<FString>Servernames);
+
 	void SetMenuInterface(IMenuInterface* SetedMenuInterFace);
 
 	void Setup();
@@ -52,7 +57,9 @@ private:
 	UButton* QuitGameButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UEditableTextBox* IPAddressField;
+	class UPanelWidget* ServerList;
+
+	TSubclassOf<class UUserWidget>ServerRowClass;
 
 	UFUNCTION()
 	void HostServer();

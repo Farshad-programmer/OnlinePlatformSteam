@@ -39,13 +39,7 @@ void UOnlinePlatformsGameInstance::Init()
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UOnlinePlatformsGameInstance::OnDestroySessionComplete);
 			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UOnlinePlatformsGameInstance::OnFindSessionsComplete);
 
-			SessionSearch = MakeShareable(new FOnlineSessionSearch());
-			if (SessionSearch.IsValid())
-			{
-				SessionSearch->bIsLanQuery = true;
-				UE_LOG(LogTemp, Warning, TEXT("Starting to Find Session!!"));
-				SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
-			}
+			
 			
 		}
 	}
@@ -112,16 +106,33 @@ void UOnlinePlatformsGameInstance::OnDestroySessionComplete(FName SessionName, b
 }
 
 
+void UOnlinePlatformsGameInstance::RefreshServerList()
+{
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	if (SessionSearch.IsValid())
+	{
+		SessionSearch->bIsLanQuery = true;
+		UE_LOG(LogTemp, Warning, TEXT("Starting to Find Session!!"));
+		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+	}
+}
+
+
 void UOnlinePlatformsGameInstance::OnFindSessionsComplete(bool Success)
 {
-	if (Success && SessionSearch.IsValid())
+	if (Success && SessionSearch.IsValid() && Menu != nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Finishing Find Session!!"));
+
+		TArray<FString>Servernames;
 
 		for (const FOnlineSessionSearchResult& SearchResult : SessionSearch->SearchResults)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Found Session name:%s"),*SearchResult.GetSessionIdStr());
+			Servernames.Add(SearchResult.GetSessionIdStr());
 		}
+
+		Menu->SetServerList(Servernames);
 	}
 	
 }
@@ -143,16 +154,18 @@ void UOnlinePlatformsGameInstance::Join(const FString& Address)
 {
 	if (Menu != nullptr)
 	{
-		Menu->Teardown();
+		/*Menu->Teardown();*/
+		Menu->SetServerList({ "test1" ,"test2" });
 	}
-	GEngine->AddOnScreenDebugMessage(0,2.f,FColor::Red,FString::Printf(TEXT("Joing %s"),*Address));
+	/*GEngine->AddOnScreenDebugMessage(0, 2.f, FColor::Red, FString::Printf(TEXT("Joing %s"), *Address));
 
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
 	if (PlayerController)
 	{
-		PlayerController->ClientTravel(Address,ETravelType::TRAVEL_Absolute);
-	}
+		PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+	}*/
 }
+
 
 
 
